@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#03050b">
+<title>Idz si Astronomi — Jelajahi Tata Surya</title>
+<style>
+:root{color-scheme:dark;--bg:#03050b;--panel:rgba(8,13,25,.88);--line:rgba(190,214,255,.16);--muted:#9aa8bd;--white:#f4f7ff;--accent:#8dc9ff}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--white);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+#app{position:relative;width:100%;height:100%;isolation:isolate;background:radial-gradient(ellipse at 50% 50%,#0a1020 0%,#03050b 60%,#010207 100%)}
+#space{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.vignette{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(0,0,0,.3),transparent 22%,transparent 70%,rgba(0,0,0,.5));z-index:1}
+.topbar{position:absolute;z-index:5;top:env(safe-area-inset-top,0px);left:0;right:0;padding:18px 18px 10px;display:flex;align-items:center;justify-content:space-between;gap:12px;pointer-events:none}
+.brand{pointer-events:auto;display:flex;align-items:center;gap:10px}
+.brandmark{width:34px;height:34px;border:1px solid rgba(153,206,255,.5);border-radius:50%;display:grid;place-items:center;box-shadow:0 0 22px rgba(70,160,255,.15);font-size:18px}
+.brandname{font-size:14px;font-weight:750;letter-spacing:.02em}.brandname span{display:block;color:var(--muted);font-size:10px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;margin-top:3px}
+.status{font-size:10px;color:#b9cce4;border:1px solid var(--line);border-radius:99px;padding:7px 10px;background:rgba(5,9,18,.55);backdrop-filter:blur(12px)}
+.intro{position:absolute;z-index:2;top:16%;left:20px;right:20px;text-align:center;pointer-events:none;text-shadow:0 2px 24px #000}
+.eyebrow{font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:#9abde5}
+h1{font-size:clamp(27px,6vw,48px);letter-spacing:-.045em;margin:9px 0 8px;line-height:1.05;font-weight:650}
+.intro p{margin:0;color:#aebbd0;font-size:12px;line-height:1.6}
+#hint{position:absolute;z-index:4;top:calc(16% + 112px);left:0;right:0;text-align:center;color:#b7c6dc;font-size:11px;pointer-events:none;transition:opacity .3s}
+.planet-rail{position:absolute;z-index:3;left:0;right:0;top:51%;transform:translateY(-50%);display:flex;align-items:center;justify-content:flex-start;gap:clamp(18px,4vw,42px);padding:16px 8vw;overflow-x:auto;scrollbar-width:none;scroll-snap-type:x mandatory;touch-action:pan-x}
+.planet-rail::-webkit-scrollbar{display:none}
+.planet{flex:0 0 auto;width:clamp(64px,17vw,100px);display:flex;flex-direction:column;align-items:center;gap:13px;scroll-snap-align:center;border:0;background:transparent;padding:7px 0 10px;min-height:110px;opacity:.88;transition:transform .25s,opacity .25s}
+.planet:active{transform:scale(.96)}.planet:hover,.planet:focus-visible{opacity:1;outline:none}
+.planet .orb{width:clamp(48px,13vw,78px);aspect-ratio:1;border-radius:50%;position:relative;display:block;box-shadow:inset -12px -8px 18px rgba(0,0,0,.8),inset 5px 4px 13px rgba(255,255,255,.12),0 0 22px rgba(110,166,255,.08);background-size:cover;background-position:center}
+.planet .orb:after{content:"";position:absolute;inset:0;border-radius:50%;background:linear-gradient(100deg,transparent 25%,rgba(0,0,0,.65) 100%);pointer-events:none}
+.planet[data-id="sun"] .orb{background:radial-gradient(circle at 35% 32%,#fff5c0 0,#ffcf66 20%,#f78c24 52%,#8e2c0a 100%);box-shadow:0 0 24px #ff9d37,inset -8px -5px 15px #8d300c}
+.planet[data-id="mercury"] .orb{background:radial-gradient(circle at 30% 28%,#b8b6b1,#706c68 50%,#292c35)}
+.planet[data-id="venus"] .orb{background:radial-gradient(circle at 30% 28%,#ffe2a0,#bd8750 54%,#583824)}
+.planet[data-id="earth"] .orb{background:radial-gradient(circle at 28% 25%,#a9e5ff,#2679c5 42%,#082a60 78%);overflow:hidden}
+.planet[data-id="mars"] .orb{background:radial-gradient(circle at 30% 28%,#ffbc83,#c45c37 50%,#54231d)}
+.planet[data-id="jupiter"] .orb{background:repeating-linear-gradient(0deg,#bba27e 0 7px,#f0ddba 7px 13px,#8a684b 13px 17px);box-shadow:inset -15px -4px 19px #211914}
+.planet[data-id="saturn"] .orb{background:radial-gradient(circle at 30% 28%,#f7e2ac,#bda16c 54%,#5e4b31)}
+.planet[data-id="saturn"] .orb:before{content:"";position:absolute;z-index:-1;left:-25%;top:35%;width:150%;height:30%;border:7px solid #c9b99a;border-left-color:#776b5a;border-right-color:#e0d1b4;border-radius:50%;transform:rotate(-24deg)}
+.planet[data-id="uranus"] .orb{background:radial-gradient(circle at 30% 28%,#c8fbff,#55c6d5 52%,#1c526d)}
+.planet[data-id="neptune"] .orb{background:radial-gradient(circle at 30% 28%,#9bcaff,#266fe1 48%,#0a174c)}
+.planet .label{font-size:12px;font-weight:600;white-space:nowrap;color:#e6edf9}
+.planet .kind{font-size:9px;color:#8798b2;margin-top:-9px}
+.orbitline{position:absolute;z-index:1;top:51%;left:3%;right:3%;height:1px;background:linear-gradient(90deg,transparent,rgba(137,178,231,.17),transparent);pointer-events:none}
+.bottom{position:absolute;z-index:5;bottom:calc(16px + env(safe-area-inset-bottom,0px));left:16px;right:16px;display:flex;align-items:center;justify-content:space-between;gap:10px;pointer-events:none}
+.bottom>*{pointer-events:auto}
+.note{font-size:10px;color:#8291a9;line-height:1.5;max-width:190px}
+.pill{border:1px solid var(--line);background:rgba(9,15,28,.78);backdrop-filter:blur(14px);padding:10px 13px;border-radius:999px;font-size:11px;white-space:nowrap}
+.pill.primary{border-color:rgba(132,193,255,.45);background:linear-gradient(135deg,rgba(39,92,149,.65),rgba(14,29,52,.8))}
+#viewer{position:absolute;z-index:10;inset:0;background:#02040a;display:none}
+#viewer.active{display:block}
+#viewCanvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.viewer-top{position:absolute;top:env(safe-area-inset-top,0px);left:0;right:0;padding:16px;display:flex;align-items:center;justify-content:space-between;gap:10px;z-index:3;pointer-events:none}
+.viewer-top>*{pointer-events:auto}
+.viewer-title{padding:9px 12px;border:1px solid var(--line);border-radius:14px;background:rgba(3,7,15,.7);backdrop-filter:blur(14px)}
+.viewer-title small{display:block;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:#8da6c8;margin-bottom:3px}
+.viewer-title strong{font-size:15px}
+.iconbtn{width:42px;height:42px;display:grid;place-items:center;border:1px solid var(--line);border-radius:50%;background:rgba(3,7,15,.72);backdrop-filter:blur(12px);font-size:20px}
+.viewer-hint{position:absolute;z-index:3;top:82px;left:0;right:0;text-align:center;font-size:10px;color:#95a7c1;pointer-events:none}
+.info{position:absolute;z-index:3;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));max-height:43%;overflow:auto;border:1px solid rgba(172,203,245,.17);border-radius:22px;background:linear-gradient(160deg,rgba(10,17,31,.9),rgba(4,8,17,.93));backdrop-filter:blur(18px);padding:17px 17px 15px;box-shadow:0 18px 70px rgba(0,0,0,.3)}
+.info-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.info-kicker{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:#8fb8e8}
+.info h2{font-size:24px;letter-spacing:-.03em;margin:5px 0 7px}
+.info p{font-size:12px;line-height:1.65;color:#c0cbdb;margin:0 0 12px}
+.facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.fact{border:1px solid rgba(166,196,235,.12);background:rgba(255,255,255,.025);padding:9px;border-radius:12px;min-width:0}
+.fact span{display:block;color:#8495ae;font-size:9px;margin-bottom:5px}
+.fact strong{font-size:11px;font-weight:650;line-height:1.4;overflow-wrap:anywhere}
+.info-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px}
+.source{font-size:9px;color:#71829c}
+.view-controls{position:absolute;z-index:4;right:13px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:8px}
+.view-controls button{width:38px;height:38px;border:1px solid var(--line);border-radius:50%;background:rgba(5,10,20,.72);backdrop-filter:blur(10px);font-size:17px}
+#loading{position:absolute;z-index:20;inset:0;display:grid;place-items:center;background:#03050b;color:#c5d5ec;text-align:center;padding:30px;transition:opacity .4s}
+#loading.hide{opacity:0;pointer-events:none}
+.loader-inner{max-width:250px}.loader-ring{width:34px;height:34px;border:2px solid #25354c;border-top-color:#9dd4ff;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
+.loader-inner strong{font-size:13px}.loader-inner p{font-size:11px;color:#7f91ac;line-height:1.5}
+@keyframes spin{to{transform:rotate(360deg)}}
+.toast{position:absolute;z-index:30;left:50%;bottom:85px;transform:translateX(-50%);padding:10px 14px;border:1px solid var(--line);background:#0b1322;border-radius:12px;font-size:11px;max-width:90%;text-align:center;display:none}
+.toast.show{display:block}
+@media(min-width:700px){
+ .intro{top:13%}.planet-rail{top:52%;justify-content:center;gap:clamp(22px,3vw,46px);overflow:visible;padding:16px}
+ .planet{width:90px}.planet .orb{width:72px}.info{left:auto;right:24px;bottom:24px;width:350px;max-height:48%}
+ .viewer-hint{top:78px}.view-controls{right:390px}
+}
+@media(max-height:650px){
+ .intro{top:13%}.intro p{display:none}#hint{top:calc(13% + 70px)}.planet-rail{top:52%}.planet{min-height:90px;gap:8px}.planet .orb{width:clamp(42px,10vh,64px)}.info{max-height:39%;padding:12px}.info h2{font-size:20px}.info p{font-size:11px;margin-bottom:8px}
+}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<div id="app">
+  <canvas id="space" aria-label="Latar bintang"></canvas>
+  <div class="vignette"></div>
+  <header class="topbar">
+    <div class="brand"><div class="brandmark">✦</div><div class="brandname">Idz si Astronomi<span>Solar system explorer</span></div></div>
+    <div class="status">9 OBJEK · 3D INTERAKTIF</div>
+  </header>
+  <section class="intro">
+    <div class="eyebrow">Jelajahi lingkungan kosmik kita</div>
+    <h1>Kenali Tata Surya</h1>
+    <p>Pilih Matahari atau planet untuk melihatnya dari dekat.</p>
+  </section>
+  <div id="hint">Geser daftar untuk melihat semua objek · Ketuk untuk menjelajah</div>
+  <div class="orbitline"></div>
+  <nav class="planet-rail" id="planetRail" aria-label="Pilih objek tata surya"></nav>
+  <footer class="bottom">
+    <div class="note">Visual tata surya disederhanakan agar seluruh objek mudah dijelajahi.</div>
+    <button class="pill primary" id="randomBtn">✦ Jelajah acak</button>
+  </footer>
+  <div id="viewer" aria-hidden="true">
+    <canvas id="viewCanvas" aria-label="Objek astronomi tiga dimensi"></canvas>
+    <div class="viewer-top">
+      <button class="iconbtn" id="backBtn" aria-label="Kembali ke tata surya">←</button>
+      <div class="viewer-title"><small>Mode eksplorasi</small><strong id="viewerName">Bumi</strong></div>
+      <button class="iconbtn" id="resetBtn" aria-label="Atur ulang kamera">⟳</button>
+    </div>
+    <div class="viewer-hint">Geser untuk memutar · Cubit atau gunakan + / − untuk zoom</div>
+    <div class="view-controls">
+      <button id="zoomIn" aria-label="Perbesar">+</button>
+      <button id="zoomOut" aria-label="Perkecil">−</button>
+      <button id="prevBtn" aria-label="Objek sebelumnya">‹</button>
+      <button id="nextBtn" aria-label="Objek berikutnya">›</button>
+    </div>
+    <section class="info" id="infoPanel">
+      <div class="info-head"><div><div class="info-kicker" id="objectType">Planet berbatu</div><h2 id="objectName">Bumi</h2></div></div>
+      <p id="description"></p>
+      <div class="facts" id="facts"></div>
+      <div class="info-footer"><div class="source" id="sourceText">Data ringkas · nilai perkiraan</div><button class="pill" id="closeInfo">Sembunyikan info</button></div>
+    </section>
+  </div>
+  <div id="loading"><div class="loader-inner"><div class="loader-ring"></div><strong>Menyiapkan ruang angkasa</strong><p>Memuat pengalaman Idz si Astronomi…</p></div></div>
+  <div id="toast" class="toast" role="status"></div>
+</div>
+<script type="module">
+const $=id=>document.getElementById(id);
+const bodies=[
+{id:"sun",name:"Matahari",type:"Bintang",kind:"Bintang",diameter:"≈ 1,39 juta km",temp:"≈ 5.500 °C",distance:"Pusat tata surya",description:"Matahari adalah bintang di pusat tata surya, bukan sebuah planet. Energinya dihasilkan melalui fusi nuklir di inti, dan cahayanya menjadi sumber energi utama bagi Bumi.",extra:"Gravitasi Matahari menjaga planet-planet tetap berada dalam orbitnya.",color:0xffb94a,radius:1.15,texture:null,emissive:true},
+{id:"mercury",name:"Merkurius",type:"Planet terestrial",kind:"Planet berbatu",diameter:"≈ 4.879 km",temp:"≈ 167 °C rata-rata",distance:"≈ 57,9 juta km",description:"Merkurius adalah planet terkecil dan planet terdekat dari Matahari. Permukaannya penuh kawah, dan karena atmosfernya sangat tipis, suhu siang dan malamnya berbeda ekstrem.",extra:"Satu tahun Merkurius berlangsung sekitar 88 hari Bumi.",color:0xaaa39b,radius:.47,texture:"https://threejs.org/examples/textures/planets/mercury.jpg"},
+{id:"venus",name:"Venus",type:"Planet terestrial",kind:"Planet berbatu",diameter:"≈ 12.104 km",temp:"≈ 465 °C rata-rata",distance:"≈ 108,2 juta km",description:"Venus memiliki atmosfer sangat tebal yang didominasi karbon dioksida. Efek rumah kaca yang kuat menjadikannya planet terpanas di tata surya, meskipun bukan yang terdekat dari Matahari.",extra:"Venus berotasi sangat lambat dan berlawanan arah dengan kebanyakan planet.",color:0xe4b875,radius:.82,texture:"https://threejs.org/examples/textures/planets/venus.jpg"},
+{id:"earth",name:"Bumi",type:"Planet terestrial",kind:"Planet berbatu",diameter:"≈ 12.742 km",temp:"≈ 15 °C rata-rata",distance:"≈ 149,6 juta km",description:"Bumi adalah satu-satunya dunia yang diketahui mendukung kehidupan. Air cair di permukaan, atmosfer pelindung, dan medan magnet membantu menjadikan Bumi tempat yang layak huni.",extra:"Sekitar 71% permukaan Bumi tertutup air.",color:0x4a9cff,radius:.86,texture:"https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg"},
+{id:"mars",name:"Mars",type:"Planet terestrial",kind:"Planet berbatu",diameter:"≈ 6.779 km",temp:"≈ −65 °C rata-rata",distance:"≈ 227,9 juta km",description:"Mars dikenal sebagai Planet Merah karena mineral besi yang teroksidasi di tanah dan debunya. Bukti geologi menunjukkan bahwa air pernah mengalir di permukaannya pada masa lalu.",extra:"Mars memiliki Olympus Mons, salah satu gunung berapi terbesar yang diketahui di tata surya.",color:0xd66c4a,radius:.62,texture:"https://threejs.org/examples/textures/planets/mars_1k_color.jpg"},
+{id:"jupiter",name:"Jupiter",type:"Raksasa gas",kind:"Raksasa gas",diameter:"≈ 139.820 km",temp:"≈ −110 °C di puncak awan",distance:"≈ 778,6 juta km",description:"Jupiter adalah planet terbesar di tata surya. Atmosfernya memiliki pita awan dan badai raksasa, termasuk Bintik Merah Besar yang telah diamati selama berabad-abad.",extra:"Jupiter memiliki banyak satelit alami, termasuk Europa yang menarik bagi penelitian astrobiologi.",color:0xd4b18a,radius:1.7,texture:"https://threejs.org/examples/textures/planets/jupiter.jpg"},
+{id:"saturn",name:"Saturnus",type:"Raksasa gas",kind:"Raksasa gas",diameter:"≈ 116.460 km",temp:"≈ −140 °C di puncak awan",distance:"≈ 1,43 miliar km",description:"Saturnus adalah raksasa gas yang terkenal dengan sistem cincinnya yang luas, tersusun terutama dari partikel es dan batu. Cincin-cincin itu sangat lebar tetapi relatif tipis.",extra:"Kerapatan rata-rata Saturnus lebih rendah daripada kerapatan air.",color:0xe5cf9d,radius:1.45,texture:"https://threejs.org/examples/textures/planets/saturn.jpg",rings:true},
+{id:"uranus",name:"Uranus",type:"Raksasa es",kind:"Raksasa es",diameter:"≈ 50.724 km",temp:"≈ −195 °C rata-rata",distance:"≈ 2,87 miliar km",description:"Uranus adalah raksasa es berwarna biru kehijauan karena metana di atmosfernya menyerap cahaya merah. Sumbu rotasinya sangat miring sehingga planet ini tampak berputar menyamping.",extra:"Uranus membutuhkan sekitar 84 tahun Bumi untuk mengelilingi Matahari.",color:0x76d8df,radius:1.12,texture:"https://threejs.org/examples/textures/planets/uranus.jpg"},
+{id:"neptune",name:"Neptunus",type:"Raksasa es",kind:"Raksasa es",diameter:"≈ 49.244 km",temp:"≈ −200 °C rata-rata",distance:"≈ 4,5 miliar km",description:"Neptunus adalah planet kedelapan dari Matahari. Atmosfernya yang biru memiliki angin sangat kencang, dan planet ini terlalu jauh untuk terlihat jelas dengan mata telanjang dari Bumi.",extra:"Neptunus membutuhkan sekitar 165 tahun Bumi untuk menyelesaikan satu orbit.",color:0x397ce7,radius:1.1,texture:"https://threejs.org/examples/textures/planets/neptune.jpg"}
+];
+const rail=$("planetRail");
+for(const b of bodies){
+ const btn=document.createElement("button");btn.className="planet";btn.dataset.id=b.id;btn.setAttribute("aria-label","Jelajahi "+b.name);
+ btn.innerHTML=`<span class="orb"></span><span class="label">${b.name}</span><span class="kind">${b.kind}</span>`;
+ rail.appendChild(btn);btn.addEventListener("click",()=>openBody(b.id));
+}
+let toastTimer;
+function toast(message){const t=$("toast");t.textContent=message;t.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove("show"),2600)}
+// Lightweight star background for the home screen.
+const starCanvas=$("space"),starCtx=starCanvas.getContext("2d");let stars=[],sw=0,sh=0;
+function resizeStars(){const d=Math.min(devicePixelRatio||1,1.5);sw=innerWidth;sh=innerHeight;starCanvas.width=Math.floor(sw*d);starCanvas.height=Math.floor(sh*d);starCtx.setTransform(d,0,0,d,0,0);stars=Array.from({length:Math.min(260,Math.floor(sw*sh/3200))},()=>({x:Math.random()*sw,y:Math.random()*sh,r:Math.random()*1.05+.15,a:Math.random()*.6+.1,p:Math.random()*6.28}));}
+function drawStars(t=0){starCtx.clearRect(0,0,sw,sh);for(const s of stars){const a=s.a*(.75+.25*Math.sin(t*.0005+s.p));starCtx.fillStyle=`rgba(205,224,255,${a})`;starCtx.beginPath();starCtx.arc(s.x,s.y,s.r,0,Math.PI*2);starCtx.fill();}if(!$("viewer").classList.contains("active"))requestAnimationFrame(drawStars);}
+addEventListener("resize",resizeStars);resizeStars();requestAnimationFrame(drawStars);
+let THREE=null,renderer=null,scene=null,camera=null,controls=null,activeBody=null,planetMesh=null,ringMesh=null,frameId=0,textureLoader=null,homeRenderer=null,homeScene=null,homeCamera=null,homeMeshes=[],homeFrame=0,viewReady=false,infoVisible=true,drag=null,pinchStart=0;
+const CDN="https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js";
+async function loadThree(){try{THREE=await import(CDN);return true}catch(e){console.error(e);toast("Three.js gagal dimuat. Periksa koneksi internet.");return false}}
+function makeRenderer(canvas){const r=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false,powerPreference:"low-power"});r.setPixelRatio(Math.min(devicePixelRatio||1,1.5));r.setSize(canvas.clientWidth,canvas.clientHeight,false);r.outputColorSpace=THREE.SRGBColorSpace;r.toneMapping=THREE.ACESFilmicToneMapping;r.toneMappingExposure=1.15;return r}
+function makeStars(scene,count=900,radius=75){const positions=new Float32Array(count*3);for(let i=0;i<count;i++){const u=Math.random()*2-1,a=Math.random()*Math.PI*2,d=radius*(.45+Math.random()*.55),s=Math.sqrt(1-u*u);positions[i*3]=d*s*Math.cos(a);positions[i*3+1]=d*u;positions[i*3+2]=d*s*Math.sin(a)}const geo=new THREE.BufferGeometry();geo.setAttribute("position",new THREE.BufferAttribute(positions,3));const mat=new THREE.PointsMaterial({color:0xc9ddff,size:.09,transparent:true,opacity:.8,sizeAttenuation:true});scene.add(new THREE.Points(geo,mat))}
+function buildHome3D(){homeScene=new THREE.Scene();homeScene.background=new THREE.Color(0x02040a);homeCamera=new THREE.PerspectiveCamera(45,innerWidth/innerHeight,.1,200);homeCamera.position.set(0,0,24);homeScene.add(new THREE.AmbientLight(0x8092b7,1.25));const light=new THREE.PointLight(0xffe1b0,90,100);light.position.set(0,0,0);homeScene.add(light);makeStars(homeScene,750,85);const group=new THREE.Group();const spacing=2.6;const scale=[.62,.3,.43,.45,.36,.78,.68,.53,.51];bodies.forEach((b,i)=>{const g=new THREE.SphereGeometry(scale[i],32,24);let mat;if(b.id==="sun")mat=new THREE.MeshBasicMaterial({color:0xffa735});else mat=new THREE.MeshStandardMaterial({color:b.color,roughness:.9,metalness:0});const m=new THREE.Mesh(g,mat);m.position.x=(i-4)*spacing;group.add(m);homeMeshes.push({mesh:m,id:b.id});if(b.rings){const rg=new THREE.RingGeometry(scale[i]*1.25,scale[i]*1.85,64);const rm=new THREE.MeshBasicMaterial({color:0xc9b99b,side:THREE.DoubleSide,transparent:true,opacity:.8});const ring=new THREE.Mesh(rg,rm);ring.position.copy(m.position);ring.rotation.x=Math.PI/2.7;group.add(ring)}});homeScene.add(group);homeRenderer=makeRenderer(starCanvas);starCanvas.style.opacity="0"; // the CSS star canvas remains the background; home 3D is rendered in a separate overlay below
+const c=document.createElement("canvas");c.id="home3d";c.style.cssText="position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none";$("app").insertBefore(c,$("app").children[1]);homeRenderer.dispose();homeRenderer=makeRenderer(c);homeRenderer.setClearColor(0x02040a,1);homeCamera.aspect=innerWidth/innerHeight;homeCamera.updateProjectionMatrix();function animateHome(){if(!$("viewer").classList.contains("active")){homeMeshes.forEach((o,i)=>{o.mesh.rotation.y+=.001+(i%3)*.0003});homeRenderer.render(homeScene,homeCamera);homeFrame=requestAnimationFrame(animateHome)}}animateHome();c.style.pointerEvents="none";c.style.opacity=".97";}
+// Use a CSS-based selectable rail for the home scene to keep every planet comfortably tappable on narrow phones.
+function setupViewer(){
+ const canvas=$("viewCanvas");renderer=makeRenderer(canvas);scene=new THREE.Scene();scene.background=new THREE.Color(0x02040a);camera=new THREE.PerspectiveCamera(45,innerWidth/innerHeight,.1,300);camera.position.set(0,0,7);scene.add(new THREE.AmbientLight(0x7183a4,.55));const key=new THREE.PointLight(0xffffff,55,100);key.position.set(-6,4,7);scene.add(key);const fill=new THREE.PointLight(0x4269a5,10,80);fill.position.set(6,-2,-4);scene.add(fill);makeStars(scene,1100,100);textureLoader=new THREE.TextureLoader();textureLoader.setCrossOrigin("anonymous");
+ const controlsState={rotX:.12,rotY:.4,distance:5,targetDistance:5};
+ function onResize(){const w=canvas.clientWidth,h=canvas.clientHeight;renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.5));renderer.setSize(w,h,false);camera.aspect=w/Math.max(1,h);camera.updateProjectionMatrix();if(homeRenderer&&homeRenderer.domElement){homeRenderer.setSize(innerWidth,innerHeight,false);homeCamera.aspect=innerWidth/innerHeight;homeCamera.updateProjectionMatrix()}}
+ addEventListener("resize",onResize);
+ function pointerDown(e){if(!planetMesh)return;drag={x:e.clientX,y:e.clientY,id:e.pointerId};canvas.setPointerCapture?.(e.pointerId)}
+ function pointerMove(e){if(!drag||drag.id!==e.pointerId||!planetMesh)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;drag.x=e.clientX;drag.y=e.clientY;controlsState.rotY+=dx*.008;controlsState.rotX=Math.max(-1.45,Math.min(1.45,controlsState.rotX+dy*.008));planetMesh.rotation.set(controlsState.rotX,controlsState.rotY,0)}
+ function pointerUp(){drag=null}
+ canvas.addEventListener("pointerdown",pointerDown);canvas.addEventListener("pointermove",pointerMove);canvas.addEventListener("pointerup",pointerUp);canvas.addEventListener("pointercancel",pointerUp);
+ let pinchLast=0;
+ canvas.addEventListener("wheel",e=>{e.preventDefault();controlsState.targetDistance=Math.max(2.1,Math.min(12,controlsState.targetDistance+e.deltaY*.008) )},{passive:false});
+ canvas.addEventListener("touchmove",e=>{if(e.touches.length===2){const dx=e.touches[0].clientX-e.touches[1].clientX,dy=e.touches[0].clientY-e.touches[1].clientY,d=Math.hypot(dx,dy);if(pinchLast)controlsState.targetDistance=Math.max(2.1,Math.min(12,controlsState.targetDistance+(pinchLast-d)*.025));pinchLast=d}},{passive:true});
+ canvas.addEventListener("touchend",()=>pinchLast=0);
+ $("zoomIn").onclick=()=>controlsState.targetDistance=Math.max(2.1,controlsState.targetDistance-.6);
+ $("zoomOut").onclick=()=>controlsState.targetDistance=Math.min(12,controlsState.targetDistance+.6);
+ $("resetBtn").onclick=()=>{controlsState.rotX=.12;controlsState.rotY=.4;controlsState.targetDistance=5;toast("Kamera diatur ulang")};
+ $("closeInfo").onclick=()=>{$("infoPanel").style.display="none";infoVisible=false};
+ function render(){frameId=requestAnimationFrame(render);if(planetMesh){planetMesh.rotation.y+=.0018;if(!drag)planetMesh.rotation.x+=(controlsState.rotX-planetMesh.rotation.x)*.06;camera.position.z+=(controlsState.targetDistance-camera.position.z)*.08;camera.lookAt(0,0,0)}renderer.render(scene,camera)}
+ render();
+ window._viewer={controlsState,render};
+}
+function createBodyMesh(b){const geo=new THREE.SphereGeometry(b.radius,80,56);let material;if(b.emissive){material=new THREE.MeshBasicMaterial({color:0xffb83f});}else{material=new THREE.MeshStandardMaterial({color:b.color,roughness:.93,metalness:0});}
+ const mesh=new THREE.Mesh(geo,material);mesh.rotation.z=.15;
+ if(b.id==="sun"){const glowGeo=new THREE.SphereGeometry(b.radius*1.12,48,32);const glowMat=new THREE.MeshBasicMaterial({color:0xff8d24,transparent:true,opacity:.12,side:THREE.BackSide});mesh.add(new THREE.Mesh(glowGeo,glowMat))}
+ if(b.rings){const rg=new THREE.RingGeometry(b.radius*1.35,b.radius*2.15,96);const rm=new THREE.MeshStandardMaterial({color:0xc5b79a,side:THREE.DoubleSide,transparent:true,opacity:.88,roughness:1});ringMesh=new THREE.Mesh(rg,rm);ringMesh.rotation.x=Math.PI/2.35;mesh.add(ringMesh)}
+ if(b.texture&&!b.emissive){textureLoader.load(b.texture,tex=>{if(activeBody?.id===b.id&&planetMesh===mesh){tex.colorSpace=THREE.SRGBColorSpace;mesh.material.map=tex;mesh.material.color.set(0xffffff);mesh.material.needsUpdate=true}},undefined,()=>{if(activeBody?.id===b.id)toast("Tekstur "+b.name+" tidak tersedia; memakai material alternatif.")})}
+ scene.add(mesh);return mesh}
+function populateInfo(b){$("viewerName").textContent=b.name;$("objectName").textContent=b.name;$("objectType").textContent=b.type;$("description").textContent=b.description+" "+b.extra;$("facts").innerHTML="";for(const [label,value] of [["Diameter",b.diameter],["Suhu",b.temp],["Jarak",b.distance]]){const d=document.createElement("div");d.className="fact";d.innerHTML=`<span>${label}</span><strong>${value}</strong>`;$("facts").appendChild(d)}$("sourceText").textContent="Data ringkas · angka perkiraan · NASA Solar System Exploration";$("infoPanel").style.display=infoVisible?"block":"none"}
+function openBody(id){const b=bodies.find(x=>x.id===id);if(!b)return;activeBody=b;$("viewer").classList.add("active");$("viewer").setAttribute("aria-hidden","false");$("viewer").style.display="block";$("hint").style.opacity="0";if(planetMesh){scene.remove(planetMesh);planetMesh.geometry.dispose();if(planetMesh.material.map)planetMesh.material.map.dispose();planetMesh.material.dispose();planetMesh=null}ringMesh=null;planetMesh=createBodyMesh(b);window._viewer.controlsState.rotX=.12;window._viewer.controlsState.rotY=.4;window._viewer.controlsState.targetDistance=b.id==="sun"?5.4:4.8;window._viewer.controlsState.distance=window._viewer.controlsState.targetDistance;camera.position.set(0,0,window._viewer.controlsState.targetDistance);camera.lookAt(0,0,0);infoVisible=true;populateInfo(b);$("infoPanel").style.display="block";$("closeInfo").textContent="Sembunyikan info";document.querySelectorAll(".planet").forEach(x=>x.classList.toggle("selected",x.dataset.id===id));}
+function closeViewer(){$("viewer").classList.remove("active");$("viewer").setAttribute("aria-hidden","true");$("hint").style.opacity="1";if(planetMesh){scene.remove(planetMesh);planetMesh.geometry.dispose();planetMesh.material.dispose();planetMesh=null}activeBody=null}
+$("backBtn").onclick=closeViewer;
+$("prevBtn").onclick=()=>{const i=bodies.findIndex(b=>b.id===activeBody?.id);openBody(bodies[(i+bodies.length-1)%bodies.length].id)};
+$("nextBtn").onclick=()=>{const i=bodies.findIndex(b=>b.id===activeBody?.id);openBody(bodies[(i+1)%bodies.length].id)};
+$("randomBtn").onclick=()=>openBody(bodies[Math.floor(Math.random()*bodies.length)].id);
+(async()=>{const ok=await loadThree();if(!ok){$("loading").querySelector("strong").textContent="Koneksi diperlukan";$("loading").querySelector("p").textContent="Aktifkan internet lalu muat ulang halaman.";return}try{setupViewer();buildHome3D();$("loading").classList.add("hide");setTimeout(()=>$("loading").remove(),500)}catch(e){console.error(e);$("loading").querySelector("strong").textContent="Simulasi belum dapat dimulai";$("loading").querySelector("p").textContent="Periksa dukungan WebGL dan koneksi internet, lalu muat ulang.";}})();
+</script>
+</body>
+</html>
